@@ -22,9 +22,6 @@ export function Header() {
               BugDrop
             </span>
           </a>
-          <span className="px-space-xs py-0.5 rounded bg-surface-container font-code-sm text-code-sm text-on-surface-variant border border-outline-variant/40 leading-none">
-            v0.9-beta
-          </span>
         </div>
 
         {/* Navigation */}
