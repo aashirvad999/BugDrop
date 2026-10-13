@@ -98,12 +98,18 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
     background-color: #faf8ff;
     color: #131b2e;
     font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
   }
 }
 
@@ -137,3 +143,15 @@
 .animate-fade-in {
   animation: fadeIn 0.25s ease-out forwards;
 }
+
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

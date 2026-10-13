@@ -78,31 +78,31 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
 
   return (
     <div
-      className="bg-surface-container-lowest p-space-lg md:p-space-xl rounded-xl shadow-sm flex flex-col space-y-space-lg border border-outline-variant/20"
+      className="bg-surface-container-lowest p-4 sm:p-6 md:p-space-xl rounded-xl shadow-xs flex flex-col space-y-space-md sm:space-y-space-lg border border-outline-variant/20"
       id="bug-submission-section"
     >
       <div className="space-y-space-xs">
-        <div className="flex items-center justify-between">
-          <h2 className="font-headline-md text-headline-md text-on-surface font-semibold">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">
             Report a Bug
           </h2>
-          <span className="font-code-sm text-code-sm px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">
+          <span className="font-code-sm text-code-sm px-2 py-0.5 rounded bg-surface-container text-on-surface-variant select-none">
             Markdown OK
           </span>
         </div>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">
+        <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
           Found a glitch? Submit the details below to log it into the triage cockpit.
         </p>
       </div>
 
       <form className="flex flex-col space-y-space-md" onSubmit={handleSubmit} noValidate>
         {/* Title Field */}
-        <div className="flex flex-col space-y-space-xs">
+        <div className="flex flex-col space-y-1.5">
           <label
             htmlFor="bug-title"
             className="font-label-md text-label-md text-on-surface flex items-center justify-between"
           >
-            <span>
+            <span className="font-medium">
               Bug Title <span className="text-error font-bold">*</span>
             </span>
             <span className="font-label-xs text-label-xs text-on-surface-variant">
@@ -119,10 +119,10 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
               if (titleError) setTitleError(null);
             }}
             placeholder="e.g., Login button unresponsive on mobile"
-            className={`w-full bg-surface-container-low px-space-md py-2 rounded-lg text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/60 focus:bg-surface-container-lowest focus:ring-2 transition-all outline-none ${
+            className={`w-full min-h-[44px] bg-surface-container-low px-3.5 py-2.5 rounded-lg text-on-surface text-base sm:text-sm font-body-md placeholder:text-on-surface-variant/60 focus:bg-surface-container-lowest focus:ring-2 transition-all outline-none ${
               titleError
                 ? "border border-error ring-1 ring-error/50 bg-error-container/20"
-                : "focus:ring-primary/40 border border-transparent"
+                : "focus:ring-primary/40 border border-transparent hover:border-outline-variant/40"
             }`}
             disabled={isSubmitting}
             aria-invalid={!!titleError}
@@ -140,12 +140,12 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
         </div>
 
         {/* Description Field */}
-        <div className="flex flex-col space-y-space-xs">
+        <div className="flex flex-col space-y-1.5">
           <label
             htmlFor="bug-desc"
             className="font-label-md text-label-md text-on-surface flex items-center justify-between"
           >
-            <span>
+            <span className="font-medium">
               Description <span className="text-error font-bold">*</span>
             </span>
             <span className="font-label-xs text-label-xs text-on-surface-variant">
@@ -162,10 +162,10 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
               if (descError) setDescError(null);
             }}
             placeholder="Describe what happened, what you expected, and how to reproduce the issue..."
-            className={`w-full bg-surface-container-low px-space-md py-2.5 rounded-lg text-on-surface font-body-md text-body-md placeholder:text-on-surface-variant/60 focus:bg-surface-container-lowest focus:ring-2 transition-all resize-none outline-none ${
+            className={`w-full min-h-[110px] bg-surface-container-low px-3.5 py-2.5 rounded-lg text-on-surface text-base sm:text-sm font-body-md placeholder:text-on-surface-variant/60 focus:bg-surface-container-lowest focus:ring-2 transition-all resize-y outline-none ${
               descError
                 ? "border border-error ring-1 ring-error/50 bg-error-container/20"
-                : "focus:ring-primary/40 border border-transparent"
+                : "focus:ring-primary/40 border border-transparent hover:border-outline-variant/40"
             }`}
             disabled={isSubmitting}
             aria-invalid={!!descError}
@@ -183,12 +183,12 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
         </div>
 
         {/* Severity Selector */}
-        <div className="flex flex-col space-y-space-xs">
+        <div className="flex flex-col space-y-1.5">
           <span className="font-label-md text-label-md text-on-surface font-medium">
             Severity Level
           </span>
           <div
-            className="grid grid-cols-3 gap-space-xs p-1 bg-surface-container-low rounded-lg"
+            className="grid grid-cols-3 gap-1.5 p-1 bg-surface-container-low rounded-lg"
             role="radiogroup"
             aria-label="Severity level options"
           >
@@ -209,14 +209,14 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
                   aria-checked={isActive}
                   onClick={() => setSeverity(level)}
                   disabled={isSubmitting}
-                  className={`py-1.5 px-space-xs rounded-md font-label-sm text-label-sm flex items-center justify-center gap-1.5 transition-all select-none ${
+                  className={`min-h-[40px] py-2 px-2 rounded-md font-label-sm text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                     isActive
                       ? "bg-surface-container-lowest text-on-surface shadow-xs font-semibold ring-1 ring-outline-variant/30"
                       : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60"
                   }`}
                 >
-                  <span className={`w-2 h-2 rounded-full ${dotColor}`}></span>
-                  <span>{level}</span>
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`}></span>
+                  <span className="truncate">{level}</span>
                 </button>
               );
             })}
@@ -224,37 +224,37 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
         </div>
 
         {/* Action Button & Security Notice */}
-        <div className="pt-space-xs flex flex-col space-y-space-sm">
+        <div className="pt-1 flex flex-col space-y-space-sm">
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`w-full py-2.5 px-space-md rounded-lg font-label-md text-label-md shadow-sm flex items-center justify-center gap-space-xs transition-all active:scale-[0.99] ${
+            className={`w-full min-h-[46px] py-3 px-space-md rounded-lg font-label-md text-sm sm:text-base font-semibold shadow-xs flex items-center justify-center gap-2 transition-all active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               isSubmitting
                 ? "bg-primary/70 text-on-primary cursor-wait"
-                : "bg-primary hover:bg-primary-container text-on-primary cursor-pointer hover:shadow"
+                : "bg-primary hover:bg-primary-container text-on-primary cursor-pointer hover:shadow-sm"
             }`}
           >
             {isSubmitting ? (
               <>
-                <span className="material-symbols-outlined text-[18px] animate-spin">
+                <span className="material-symbols-outlined text-[20px] animate-spin">
                   sync
                 </span>
                 <span>Adding to Queue...</span>
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-[18px]">send</span>
+                <span className="material-symbols-outlined text-[20px]">send</span>
                 <span>Submit Bug Report</span>
               </>
             )}
           </button>
 
           <div className="flex items-start gap-1.5 text-on-surface-variant/80 pt-1">
-            <span className="material-symbols-outlined text-[14px] mt-0.5 text-outline">
+            <span className="material-symbols-outlined text-[15px] mt-0.5 text-outline flex-shrink-0">
               lock
             </span>
-            <p className="font-body-sm text-body-sm leading-relaxed">
-              Please avoid including passwords, access tokens, or other sensitive information in bug reports.
+            <p className="font-body-sm text-xs sm:text-sm leading-relaxed">
+              Please avoid including passwords, access tokens, or confidential keys in bug reports.
             </p>
           </div>
         </div>

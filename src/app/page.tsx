@@ -39,17 +39,17 @@ export default function DashboardPage() {
     <>
       <Header />
 
-      <main className="flex-1 w-full pt-14 bg-surface max-w-7xl mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
-        <div className="flex flex-col w-full py-space-lg space-y-space-xl">
+      <main className="flex-1 w-full pt-16 sm:pt-20 pb-12 bg-surface max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col w-full space-y-6 sm:space-y-8">
           {/* Toast Notification (Feedback on bug submission) */}
           {toastMessage && (
             <div
-              className="flex items-center justify-between bg-surface-container-lowest p-space-md rounded-xl shadow-md border border-outline-variant/30 animate-fade-in transition-all duration-300"
+              className="flex items-center justify-between gap-3 bg-surface-container-lowest p-3.5 sm:p-4 rounded-xl shadow-md border border-outline-variant/30 animate-fade-in transition-all duration-300"
               role="alert"
               aria-live="polite"
             >
-              <div className="flex items-center gap-space-md">
-                <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary flex-shrink-0">
                   <span
                     className="material-symbols-outlined text-[18px]"
                     style={{ fontVariationSettings: "'FILL' 1" }}
@@ -57,12 +57,12 @@ export default function DashboardPage() {
                     check_circle
                   </span>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-label-md text-label-md text-on-surface font-semibold">
+                <div className="flex flex-col min-w-0">
+                  <span className="font-label-md text-sm sm:text-base text-on-surface font-semibold truncate">
                     {toastMessage}
                   </span>
-                  <span className="font-body-sm text-body-sm text-on-surface-variant">
-                    Thank you for helping improve BugDrop. Issue added to in-memory queue.
+                  <span className="font-body-sm text-xs sm:text-sm text-on-surface-variant truncate sm:whitespace-normal">
+                    Issue added to triage queue.
                   </span>
                 </div>
               </div>
@@ -70,7 +70,7 @@ export default function DashboardPage() {
                 type="button"
                 aria-label="Dismiss notification"
                 onClick={() => setToastMessage(null)}
-                className="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+                className="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center flex-shrink-0"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -78,24 +78,24 @@ export default function DashboardPage() {
           )}
 
           {/* Header & Primary Action */}
-          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
-            <div className="space-y-space-xs">
-              <div className="flex items-center gap-space-xs text-on-surface-variant font-code-sm text-code-sm">
+          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-on-surface-variant font-code-sm text-[11px] sm:text-xs tracking-wider flex-wrap">
                 <span>PUBLIC REPOSITORY</span>
-                <span>/</span>
-                <span className="text-primary font-medium">COMMUNITY WORKSPACE</span>
+                <span className="text-outline-variant">/</span>
+                <span className="text-primary font-semibold">COMMUNITY WORKSPACE</span>
               </div>
-              <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">
+              <h1 className="text-2xl sm:text-3xl lg:text-headline-xl text-on-surface tracking-tight font-bold">
                 Bug Dashboard
               </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                Report issues, track progress, and help keep things running smoothly.
+              <p className="font-body-md text-sm sm:text-base text-on-surface-variant max-w-2xl">
+                Report issues, track progress, and collaborate on bug fixes in real time.
               </p>
             </div>
-            <div className="flex items-center gap-space-sm pt-space-xs sm:pt-0">
+            <div className="flex items-center gap-2 pt-1 sm:pt-0">
               <a
                 href="#bug-submission-section"
-                className="inline-flex items-center gap-space-xs px-space-md py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-sm hover:bg-primary-container transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 font-medium"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-sm font-semibold shadow-xs hover:bg-primary-container transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99]"
               >
                 <span className="material-symbols-outlined text-[18px]">add_circle</span>
                 <span>Report a Bug</span>
@@ -111,14 +111,14 @@ export default function DashboardPage() {
           />
 
           {/* Interactive Grid: Intake Form & Bug List */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
-            {/* Left Column: Bug Submission Form (5 Cols) */}
-            <div className="lg:col-span-5">
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            {/* Left Column: Bug Submission Form (5 Cols, Sticky on Desktop/Laptop) */}
+            <div className="lg:col-span-5 lg:sticky lg:top-20 order-2 lg:order-1">
               <BugReportForm onSubmitSuccess={handleNewReport} />
             </div>
 
             {/* Right Column: Recent Bug Reports (7 Cols) */}
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7 order-1 lg:order-2">
               <BugReportList
                 reports={reports}
                 onResetSeedData={handleResetSeedData}

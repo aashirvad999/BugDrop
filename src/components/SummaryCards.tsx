@@ -15,12 +15,12 @@ export function SummaryCards({
 }: SummaryCardsProps) {
   return (
     <section
-      className="grid grid-cols-1 sm:grid-cols-3 gap-space-md"
+      className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-space-md"
       aria-label="Bug status summary metrics"
     >
       {/* Open Card */}
-      <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between space-y-space-md hover:shadow-md transition-shadow border border-outline-variant/20">
-        <div className="flex items-center justify-between">
+      <div className="bg-surface-container-lowest p-4 sm:p-5 rounded-xl shadow-xs flex flex-col justify-between space-y-3 hover:shadow-sm hover:border-outline-variant/40 transition-all border border-outline-variant/20">
+        <div className="flex items-center justify-between gap-2">
           <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
             Open
           </span>
@@ -29,19 +29,19 @@ export function SummaryCards({
             Awaiting Triage
           </span>
         </div>
-        <div className="flex items-baseline justify-between">
-          <span className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">
+        <div className="flex items-baseline justify-between gap-2 pt-1">
+          <span className="text-2xl sm:text-3xl lg:text-headline-xl text-on-surface font-bold tracking-tight">
             {openCount}
           </span>
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
+          <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
             {openCount === 1 ? "report queued" : "reports queued"}
           </span>
         </div>
       </div>
 
       {/* In Progress Card */}
-      <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between space-y-space-md hover:shadow-md transition-shadow border border-outline-variant/20">
-        <div className="flex items-center justify-between">
+      <div className="bg-surface-container-lowest p-4 sm:p-5 rounded-xl shadow-xs flex flex-col justify-between space-y-3 hover:shadow-sm hover:border-outline-variant/40 transition-all border border-outline-variant/20">
+        <div className="flex items-center justify-between gap-2">
           <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
             In Progress
           </span>
@@ -50,19 +50,19 @@ export function SummaryCards({
             Investigating
           </span>
         </div>
-        <div className="flex items-baseline justify-between">
-          <span className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">
+        <div className="flex items-baseline justify-between gap-2 pt-1">
+          <span className="text-2xl sm:text-3xl lg:text-headline-xl text-on-surface font-bold tracking-tight">
             {inProgressCount}
           </span>
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
-            {inProgressCount === 1 ? "actively handled" : "actively handled"}
+          <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
+            {inProgressCount === 1 ? "under review" : "under review"}
           </span>
         </div>
       </div>
 
       {/* Resolved Card */}
-      <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between space-y-space-md hover:shadow-md transition-shadow border border-outline-variant/20">
-        <div className="flex items-center justify-between">
+      <div className="bg-surface-container-lowest p-4 sm:p-5 rounded-xl shadow-xs flex flex-col justify-between space-y-3 hover:shadow-sm hover:border-outline-variant/40 transition-all border border-outline-variant/20">
+        <div className="flex items-center justify-between gap-2">
           <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
             Resolved
           </span>
@@ -71,12 +71,12 @@ export function SummaryCards({
             Completed
           </span>
         </div>
-        <div className="flex items-baseline justify-between">
-          <span className="font-headline-xl text-headline-xl text-on-surface font-semibold tracking-tight">
+        <div className="flex items-baseline justify-between gap-2 pt-1">
+          <span className="text-2xl sm:text-3xl lg:text-headline-xl text-on-surface font-bold tracking-tight">
             {resolvedCount}
           </span>
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
-            closed this release
+          <span className="font-body-sm text-body-sm text-on-surface-variant truncate">
+            closed this cycle
           </span>
         </div>
       </div>
