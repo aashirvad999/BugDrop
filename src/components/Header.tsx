@@ -1,27 +1,48 @@
 "use client";
 
 import React, { useState } from "react";
+import { Menu, X, Search, LayoutDashboard, Bug, PlusCircle } from "lucide-react";
 
-export function Header() {
+interface HeaderProps {
+  onOpenCommand?: () => void;
+}
+
+export function Header({ onOpenCommand }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-md border-b border-outline-variant/30">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-md border-b border-border">
       <div className="h-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand identity */}
         <div className="flex items-center gap-3">
           <a
             href="#"
-            className="flex items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg py-1 px-0.5"
+            className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-md py-1 px-0.5"
             aria-label="BugDrop Home"
           >
-            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center p-1 shadow-xs border border-outline-variant/30 group-hover:border-primary/40 transition-colors">
-              <span className="material-symbols-outlined text-primary text-[20px]">
-                bug_report
-              </span>
+            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shadow-xs group-hover:bg-primary-hover transition-colors relative">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle cx="8" cy="8" r="5.5" stroke="#FFFFFF" strokeWidth="1.4" />
+                <path
+                  d="M8 1.5V4M8 12V14.5M1.5 8H4M12 8H14.5"
+                  stroke="#FFFFFF"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
+                <circle cx="8" cy="8" r="2" fill="#EA580C" />
+              </svg>
             </div>
-            <span className="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">
+            <span className="font-display text-[15px] text-ink tracking-tight font-bold">
               BugDrop
+            </span>
+            <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded bg-surface-subtle border border-border font-mono text-[10px] font-medium text-ink-secondary tracking-wider uppercase">
+              Triage
             </span>
           </a>
         </div>
@@ -34,104 +55,128 @@ export function Header() {
           <a
             href="#"
             aria-current="page"
-            className="transition-colors bg-surface-container-high text-primary font-label-md text-label-md rounded-md px-3 py-1.5 font-medium"
+            className="transition-colors bg-surface-subtle text-ink text-xs font-semibold rounded-md px-3 py-1.5 border border-border/80"
           >
-            Dashboard
+            Cockpit
           </a>
           <a
             href="#reports-section"
-            className="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60 rounded-md px-3 py-1.5 transition-colors"
+            className="text-xs font-medium text-ink-secondary hover:text-ink hover:bg-surface-subtle/70 rounded-md px-3 py-1.5 transition-colors"
           >
-            Reports
+            Queue
           </a>
           <a
             href="#bug-submission-section"
-            className="font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60 rounded-md px-3 py-1.5 transition-colors"
+            className="text-xs font-medium text-ink-secondary hover:text-ink hover:bg-surface-subtle/70 rounded-md px-3 py-1.5 transition-colors"
           >
-            Submit Bug
+            Report Bug
           </a>
         </nav>
 
         {/* Header Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden md:flex items-center bg-surface-container-low px-2.5 py-1 rounded-md text-on-surface-variant gap-1.5 font-code-sm text-code-sm border border-outline-variant/30 select-none">
-            <span className="material-symbols-outlined text-[16px]">search</span>
-            <span>⌘K</span>
-          </div>
+          <button
+            type="button"
+            onClick={onOpenCommand}
+            className="hidden md:flex items-center bg-surface-subtle hover:bg-surface-hover px-2.5 py-1 rounded-md text-ink-secondary hover:text-ink gap-2 font-mono text-[11px] border border-border transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label="Open command palette"
+            title="Quick search & commands (⌘K)"
+          >
+            <Search className="w-3.5 h-3.5 text-ink-muted" />
+            <span>Quick jump</span>
+            <kbd className="px-1 py-0.2 rounded bg-surface border border-border text-[10px] text-ink-muted font-mono">
+              ⌘K
+            </kbd>
+          </button>
 
           {/* Profile session indicator */}
-          <div className="flex items-center gap-2 pl-2 sm:pl-3 border-l border-outline-variant/40">
+          <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-border">
             <div
               className="relative flex items-center"
-              title="Maintainer session (Visual preview for Phase 1)"
+              title="Maintainer session (Active)"
             >
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary border border-outline-variant/50 flex items-center justify-center font-label-sm font-semibold text-label-sm">
+              <div className="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-mono font-semibold text-[11px] tracking-tight">
                 AC
               </div>
               <span
-                className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary-container rounded-full ring-2 ring-surface-container-lowest"
+                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-surface"
                 title="Active status"
-              ></span>
+              />
             </div>
             <div className="hidden lg:flex flex-col">
-              <span className="font-label-sm text-label-sm text-on-surface leading-tight font-medium">
-                Core Maintainer
-              </span>
-              <span className="font-label-xs text-label-xs text-on-surface-variant leading-none">
+              <span className="text-xs text-ink leading-tight font-semibold">
                 Alex Chen
+              </span>
+              <span className="font-mono text-[10px] text-ink-muted leading-none">
+                Core Maintainer
               </span>
             </div>
           </div>
 
-          {/* Mobile Menu Button (Hamburger) */}
+          {/* Mobile Menu Button */}
           <button
             type="button"
-            className="sm:hidden p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary min-h-[40px] min-w-[40px] flex items-center justify-center"
+            className="sm:hidden p-2 rounded-md text-ink-secondary hover:text-ink hover:bg-surface-subtle transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent min-h-[40px] min-w-[40px] flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation menu"
           >
-            <span className="material-symbols-outlined text-[22px]">
-              {mobileMenuOpen ? "close" : "menu"}
-            </span>
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer / Dropdown */}
+      {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="sm:hidden border-t border-outline-variant/30 bg-surface-container-lowest/98 px-4 py-3 shadow-lg animate-fade-in backdrop-blur-md">
+        <div className="sm:hidden border-t border-border bg-surface px-4 py-3 shadow-lg">
           <nav className="flex flex-col space-y-1" aria-label="Mobile Navigation">
             <a
               href="#"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-surface-container-high text-primary font-label-md text-label-md font-semibold"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-md bg-surface-subtle text-ink text-sm font-semibold min-h-[44px]"
             >
-              <span className="material-symbols-outlined text-[18px]">dashboard</span>
-              <span>Dashboard</span>
+              <LayoutDashboard className="w-4 h-4 text-accent" />
+              <span>Cockpit</span>
             </a>
             <a
               href="#reports-section"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60 font-label-md text-label-md font-medium transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-md text-ink-secondary hover:text-ink hover:bg-surface-subtle text-sm font-medium transition-colors min-h-[44px]"
             >
-              <span className="material-symbols-outlined text-[18px]">bug_report</span>
-              <span>Recent Reports</span>
+              <Bug className="w-4 h-4" />
+              <span>Triage Queue</span>
             </a>
             <a
               href="#bug-submission-section"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container/60 font-label-md text-label-md font-medium transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-md text-ink-secondary hover:text-ink hover:bg-surface-subtle text-sm font-medium transition-colors min-h-[44px]"
             >
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>
+              <PlusCircle className="w-4 h-4" />
               <span>Report a Bug</span>
             </a>
-            <div className="pt-2 mt-2 border-t border-outline-variant/30 flex items-center justify-between px-3 text-on-surface-variant text-xs">
+            {onOpenCommand && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenCommand();
+                }}
+                className="flex items-center gap-2.5 px-3 py-2.5 rounded-md text-ink-secondary hover:text-ink hover:bg-surface-subtle text-sm font-medium transition-colors min-h-[44px] w-full text-left"
+              >
+                <Search className="w-4 h-4" />
+                <span>Quick Search</span>
+              </button>
+            )}
+            <div className="pt-2.5 mt-2 border-t border-border flex items-center justify-between px-3 text-ink-muted text-xs">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-secondary-container"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
                 Maintainer: Alex Chen
               </span>
-              <span className="font-code-sm text-code-sm">Online</span>
+              <span className="font-mono text-[11px]">Online</span>
             </div>
           </nav>
         </div>

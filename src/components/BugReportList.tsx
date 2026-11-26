@@ -1,67 +1,141 @@
 "use client";
 
 import React, { useState } from "react";
-import { BugReport } from "../types/bug";
+import { motion } from "motion/react";
+import {
+  Search,
+  X,
+  Bug,
+  Terminal,
+  Database,
+  User,
+  Clock,
+  ArrowUpRight,
+  Copy,
+  Check,
+} from "lucide-react";
+import { BugReport, BugStatus, Severity } from "../types/bug";
 import { formatReportDate } from "../utils/date";
 
 interface BugReportListProps {
   reports: BugReport[];
+  statusFilter: "All" | BugStatus;
+  onStatusFilterChange: (status: "All" | BugStatus) => void;
+  onSelectReport: (report: BugReport) => void;
   onResetSeedData: () => void;
-  onClearAll?: () => void;
 }
+
+const SEVERITY_STYLE: Record<
+  Severity,
+  { badge: string; dot: string; rail: string }
+> = {
+  High: {
+    badge: "bg-red-50 text-red-700 border-red-200/80",
+    dot: "bg-red-600",
+    rail: "bg-red-500",
+  },
+  Medium: {
+    badge: "bg-amber-50 text-amber-700 border-amber-200/80",
+    dot: "bg-amber-500",
+    rail: "bg-amber-400",
+  },
+  Low: {
+    badge: "bg-zinc-100 text-zinc-700 border-zinc-200/80",
+    dot: "bg-zinc-400",
+    rail: "bg-zinc-300",
+  },
+};
+
+const STATUS_STYLE: Record<BugStatus, { badge: string; dot: string }> = {
+  Open: {
+    badge: "bg-orange-50 text-orange-700 border-orange-200/80",
+    dot: "bg-orange-500",
+  },
+  "In Progress": {
+    badge: "bg-blue-50 text-blue-700 border-blue-200/80",
+    dot: "bg-blue-500",
+  },
+  Resolved: {
+    badge: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+    dot: "bg-emerald-500",
+  },
+};
+
+const CURL_SNIPPET = `curl -X POST https://api.bugdrop.app/v1/report \\
+  -H "Authorization: Bearer dev_token" \\
+  -d '{"title":"Test Ping","severity":"low"}'`;
 
 export function BugReportList({
   reports,
+  statusFilter,
+  onStatusFilterChange,
+  onSelectReport,
   onResetSeedData,
 }: BugReportListProps) {
-  const [filter, setFilter] = useState<"All" | "Open" | "In Progress" | "Resolved">("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [severityFilter, setSeverityFilter] = useState<"All" | Severity>("All");
+  const [copiedCurl, setCopiedCurl] = useState(false);
 
   const filteredReports = reports.filter((r) => {
-    const matchesFilter = filter === "All" || r.status === filter;
+    const matchesStatus = statusFilter === "All" || r.status === statusFilter;
+    const matchesSeverity =
+      severityFilter === "All" || r.severity === severityFilter;
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return matchesFilter;
+    if (!q) return matchesStatus && matchesSeverity;
     const matchesSearch =
       r.title.toLowerCase().includes(q) ||
       r.id.toLowerCase().includes(q) ||
       r.description.toLowerCase().includes(q) ||
       (r.reporter && r.reporter.toLowerCase().includes(q));
-    return matchesFilter && matchesSearch;
+    return matchesStatus && matchesSeverity && matchesSearch;
   });
 
+  const handleCopyCurl = async () => {
+    try {
+      await navigator.clipboard.writeText(CURL_SNIPPET);
+      setCopiedCurl(true);
+      setTimeout(() => setCopiedCurl(false), 1800);
+    } catch {
+      // Clipboard unavailable
+    }
+  };
+
   return (
-    <div className="flex flex-col space-y-3 sm:space-y-4" id="reports-section">
-      {/* Header and Filter Controls */}
+    <div className="flex flex-col gap-3.5" id="reports-section">
+      {/* Header & Filter Controls */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <h2 className="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">
-              Recent Bug Reports
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-display text-lg text-ink font-bold tracking-tight">
+              Triage Queue
             </h2>
-            <span className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-xs text-xs font-semibold">
-              {filteredReports.length}{filteredReports.length !== reports.length ? ` of ${reports.length}` : " total"}
+            <span className="px-2 py-0.5 rounded-full bg-surface-subtle border border-border text-ink-secondary font-mono text-[11px] font-medium tabular-nums">
+              {filteredReports.length}
+              {filteredReports.length !== reports.length
+                ? ` / ${reports.length}`
+                : " total"}
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 text-on-surface-variant font-label-xs text-xs">
-            <span className="uppercase tracking-wider">Live Sync</span>
-            <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+          <div className="hidden sm:flex items-center gap-2 text-ink-muted font-mono text-[11px]">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+            </span>
+            <span className="uppercase tracking-wider">Live Stream</span>
           </div>
         </div>
 
-        {/* Search & Status Filter Controls Bar */}
+        {/* Search & Status Filter Bar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-          {/* Quick Search */}
           <div className="relative flex-1 min-w-0">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">
-              search
-            </span>
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by title, ID, or description..."
-              className="w-full min-h-[38px] pl-9 pr-8 py-1.5 rounded-lg bg-surface-container-low text-on-surface text-sm font-body-md placeholder:text-on-surface-variant/60 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/40 outline-none border border-outline-variant/30 transition-all hover:border-outline-variant/50"
+              placeholder="Search by ID, title, reporter..."
+              className="w-full min-h-[38px] pl-9 pr-8 py-1.5 rounded-md bg-surface text-ink text-sm placeholder:text-ink-muted/70 focus:ring-2 focus:ring-ink/10 focus:border-ink outline-none border border-border transition-all hover:border-border-strong"
               aria-label="Search bug reports"
             />
             {searchQuery && (
@@ -69,207 +143,257 @@ export function BugReportList({
                 type="button"
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search query"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface p-0.5 rounded"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink p-0.5 rounded cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px]">close</span>
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Filter Pills */}
+          {/* Animated Status Tabs */}
           <div
-            className="flex items-center bg-surface-container-low p-1 rounded-lg border border-outline-variant/30 text-xs overflow-x-auto scrollbar-none flex-shrink-0"
+            className="flex items-center bg-surface-subtle p-1 rounded-md border border-border text-xs overflow-x-auto scrollbar-none flex-shrink-0"
             role="tablist"
             aria-label="Filter bug reports by status"
           >
-            {(["All", "Open", "In Progress", "Resolved"] as const).map((status) => (
+            {(["All", "Open", "In Progress", "Resolved"] as const).map(
+              (status) => {
+                const isActive = statusFilter === status;
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => onStatusFilterChange(status)}
+                    className={`relative min-h-[30px] px-2.5 sm:px-3 py-1 rounded transition-colors font-medium whitespace-nowrap cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                      isActive
+                        ? "text-ink font-semibold"
+                        : "text-ink-secondary hover:text-ink"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="status-tab-pill"
+                        transition={{
+                          type: "spring",
+                          stiffness: 420,
+                          damping: 34,
+                        }}
+                        className="absolute inset-0 bg-surface rounded shadow-xs border border-border"
+                      />
+                    )}
+                    <span className="relative z-10">{status}</span>
+                  </button>
+                );
+              }
+            )}
+          </div>
+        </div>
+
+        {/* Severity Filter Chips */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="font-mono text-[11px] text-ink-muted mr-1">
+            Severity:
+          </span>
+          {(["All", "High", "Medium", "Low"] as const).map((sev) => {
+            const active = severityFilter === sev;
+            return (
               <button
-                key={status}
+                key={sev}
                 type="button"
-                role="tab"
-                aria-selected={filter === status}
-                onClick={() => setFilter(status)}
-                className={`min-h-[30px] px-2.5 sm:px-3 py-1 rounded-md transition-all font-medium whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                  filter === status
-                    ? "bg-surface-container-lowest text-primary shadow-xs font-semibold"
-                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container/40"
+                onClick={() => setSeverityFilter(sev)}
+                className={`px-2.5 py-1 rounded text-[11px] font-mono transition-colors cursor-pointer border focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                  active
+                    ? "bg-ink text-on-primary border-ink font-medium"
+                    : "bg-surface text-ink-secondary border-border hover:border-border-strong hover:text-ink"
                 }`}
               >
-                {status}
+                {sev}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Reports Stream or Empty State */}
       {filteredReports.length === 0 ? (
-        <div className="bg-surface-container-lowest rounded-xl shadow-xs p-6 sm:p-8 md:p-space-xl flex flex-col items-center justify-center text-center min-h-[340px] border border-outline-variant/20">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-surface-container-low flex items-center justify-center mb-4 shadow-xs">
-            <span className="material-symbols-outlined text-outline text-[28px] sm:text-[32px]">
-              pest_control
-            </span>
+        <div className="bg-surface rounded-lg border border-border p-6 sm:p-8 flex flex-col items-center justify-center text-center min-h-[340px]">
+          <div className="w-12 h-12 rounded-lg bg-surface-subtle border border-border flex items-center justify-center mb-4">
+            <Bug className="w-6 h-6 text-ink-muted" />
           </div>
 
-          <h3 className="text-base sm:text-lg font-semibold text-on-surface tracking-tight mb-1.5">
+          <h3 className="font-display text-base sm:text-lg font-bold text-ink tracking-tight mb-1.5">
             {reports.length === 0
               ? "No bug reports yet"
               : searchQuery
               ? `No matching reports for "${searchQuery}"`
-              : `No ${filter} issues`}
+              : "No matching issues"}
           </h3>
 
-          <p className="font-body-sm text-sm text-on-surface-variant max-w-md mx-auto mb-5 leading-relaxed">
+          <p className="text-xs sm:text-sm text-ink-secondary max-w-md mx-auto mb-5 leading-relaxed">
             {reports.length === 0
               ? "When someone reports an issue, it will appear here. Submit the form to log your project's first bug."
-              : searchQuery
-              ? "Try adjusting your search terms or clearing the filter to find other reports."
-              : `There are currently no bug reports marked as "${filter}".`}
+              : "Try adjusting your search terms or clearing the active status and severity filters."}
           </p>
 
           {reports.length === 0 ? (
-            <div className="w-full max-w-md bg-surface-container-low rounded-lg p-3 sm:p-4 text-left mb-4 border border-outline-variant/30">
-              <div className="flex items-center justify-between text-on-surface-variant mb-2">
-                <span className="font-code-sm text-xs flex items-center gap-1 font-medium">
-                  <span className="material-symbols-outlined text-[14px]">code</span>
+            <div className="w-full max-w-md bg-surface-subtle rounded-md p-3.5 text-left border border-border">
+              <div className="flex items-center justify-between text-ink-secondary mb-2">
+                <span className="font-mono text-[11px] flex items-center gap-1.5 font-medium">
+                  <Terminal className="w-3.5 h-3.5" />
                   cURL Ingest Preview
                 </span>
-                <span className="font-code-sm text-xs text-tertiary">
-                  v1/events
-                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyCurl}
+                  className="inline-flex items-center gap-1 font-mono text-[11px] text-ink-secondary hover:text-ink cursor-pointer"
+                >
+                  {copiedCurl ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-600" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      Copy
+                    </>
+                  )}
+                </button>
               </div>
-              <div className="bg-surface-container-lowest p-2.5 rounded font-code-sm text-xs text-on-surface select-all overflow-x-auto shadow-xs border border-outline-variant/20">
-                <code>{`curl -X POST https://api.bugdrop.app/v1/report \\
-  -H "Authorization: Bearer dev_token" \\
-  -d '{"title":"Test Ping","severity":"low"}'`}</code>
-              </div>
+              <pre className="bg-surface p-2.5 rounded font-mono text-[11px] text-ink overflow-x-auto border border-border">
+                <code>{CURL_SNIPPET}</code>
+              </pre>
               <button
                 type="button"
                 onClick={onResetSeedData}
-                className="mt-3 w-full min-h-[36px] py-1.5 px-3 rounded-md bg-surface-container-lowest hover:bg-surface-container text-primary text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-outline-variant/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="mt-3 w-full min-h-[38px] py-1.5 px-3 rounded-md bg-surface hover:bg-surface-hover text-ink text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-border cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                <span className="material-symbols-outlined text-[16px]">dataset</span>
+                <Database className="w-3.5 h-3.5 text-accent" />
                 Pre-load Sample Seed Data
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-center">
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="min-h-[36px] py-1.5 px-4 rounded-lg bg-primary text-on-primary text-xs sm:text-sm font-medium hover:bg-primary-container transition-colors shadow-xs"
+                  className="min-h-[36px] py-1.5 px-4 rounded-md bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors cursor-pointer"
                 >
-                  Clear search query
+                  Clear search
                 </button>
               )}
-              {filter !== "All" && (
+              {(statusFilter !== "All" || severityFilter !== "All") && (
                 <button
                   type="button"
-                  onClick={() => setFilter("All")}
-                  className="min-h-[36px] py-1.5 px-4 rounded-lg bg-surface-container text-primary text-xs sm:text-sm font-medium hover:bg-surface-container-high transition-colors"
+                  onClick={() => {
+                    onStatusFilterChange("All");
+                    setSeverityFilter("All");
+                  }}
+                  className="min-h-[36px] py-1.5 px-4 rounded-md bg-surface-subtle text-ink border border-border text-xs font-semibold hover:bg-surface-hover transition-colors cursor-pointer"
                 >
-                  Show all reports
+                  Reset filters
                 </button>
               )}
             </div>
           )}
         </div>
       ) : (
-        <div className="flex flex-col space-y-2.5 sm:space-y-3" role="feed" aria-label="Recent bugs list">
+        <div
+          className="flex flex-col gap-2.5"
+          role="feed"
+          aria-label="Recent bugs list"
+        >
           {filteredReports.map((report) => {
-            // Severity badge styling
-            const severityBadge =
-              report.severity === "High" ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-xs text-[11px] font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-error"></span>
-                  High
-                </span>
-              ) : report.severity === "Medium" ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-tertiary-container font-label-xs text-[11px] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                  Medium
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-xs text-[11px] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-outline"></span>
-                  Low
-                </span>
-              );
-
-            // Status badge styling
-            const statusBadge =
-              report.status === "Open" ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-secondary font-label-xs text-[11px] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                  Open
-                </span>
-              ) : report.status === "In Progress" ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-tertiary-container font-label-xs text-[11px] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
-                  In Progress
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-xs text-[11px] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
-                  Resolved
-                </span>
-              );
+            const sevStyle = SEVERITY_STYLE[report.severity];
+            const statStyle = STATUS_STYLE[report.status];
 
             return (
-              <article
+              <motion.article
                 key={report.id}
-                className="bg-surface-container-lowest p-3.5 sm:p-4 rounded-xl shadow-xs hover:shadow-sm hover:border-outline-variant/40 transition-all flex flex-col space-y-2 border border-outline-variant/20 animate-fade-in group"
+                layout="position"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => onSelectReport(report)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectReport(report);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Inspect bug report ${report.id}: ${report.title}`}
+                className="relative bg-surface p-4 rounded-lg border border-border hover:border-border-strong shadow-[0_1px_2px_rgba(9,9,11,0.03)] hover:shadow-sm transition-all flex flex-col gap-2.5 group cursor-pointer overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
-                {/* Meta row 1: ID & Badges */}
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-code-sm text-xs text-primary font-semibold tracking-wide bg-primary/5 px-2 py-0.5 rounded border border-primary/10">
+                {/* Left severity accent rail */}
+                <span
+                  className={`absolute left-0 top-0 bottom-0 w-[3px] ${sevStyle.rail} opacity-75 group-hover:opacity-100 transition-opacity`}
+                />
+
+                {/* Top Meta Row */}
+                <div className="flex items-center justify-between gap-2 flex-wrap pl-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[11px] text-ink font-semibold bg-surface-subtle px-2 py-0.5 rounded border border-border">
                       #{report.id}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[11px] font-medium ${sevStyle.badge}`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${sevStyle.dot}`}
+                      />
+                      {report.severity}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    {severityBadge}
-                    {statusBadge}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[11px] font-medium ${statStyle.badge}`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${statStyle.dot}`}
+                      />
+                      {report.status}
+                    </span>
                   </div>
                 </div>
 
-                {/* Title */}
-                <h3
-                  className={`text-sm sm:text-base text-on-surface leading-snug break-words ${
-                    report.status === "Resolved"
-                      ? "line-through text-on-surface-variant/70 font-medium"
-                      : "font-semibold text-on-surface group-hover:text-primary transition-colors"
-                  }`}
-                >
-                  {report.title}
-                </h3>
+                {/* Title & Description */}
+                <div className="pl-1 space-y-1">
+                  <h3
+                    className={`text-sm sm:text-[15px] leading-snug break-words flex items-start justify-between gap-2 ${
+                      report.status === "Resolved"
+                        ? "line-through text-ink-muted font-medium"
+                        : "font-semibold text-ink group-hover:text-accent transition-colors"
+                    }`}
+                  >
+                    <span>{report.title}</span>
+                    <ArrowUpRight className="w-4 h-4 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+                  </h3>
+                  <p className="text-xs sm:text-[13px] text-ink-secondary line-clamp-2 leading-relaxed break-words">
+                    {report.description}
+                  </p>
+                </div>
 
-                {/* Description preview */}
-                <p className="font-body-sm text-xs sm:text-sm text-on-surface-variant line-clamp-2 leading-relaxed break-words">
-                  {report.description}
-                </p>
-
-                {/* Footer metadata: reporter & formatted relative time */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1 border-t border-outline-variant/20 font-code-sm text-[11px] sm:text-xs text-on-surface-variant/80">
-                  <span className="truncate flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[13px] text-outline">
-                      person
-                    </span>
+                {/* Footer Metadata */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-2 pl-1 border-t border-border/70 font-mono text-[11px] text-ink-muted">
+                  <span className="truncate flex items-center gap-1.5">
+                    <User className="w-3 h-3 flex-shrink-0" />
                     <span>
                       {report.reporter || "Anonymous"}
-                      {report.environment ? ` • ${report.environment}` : ""}
+                      {report.environment ? ` · ${report.environment}` : ""}
                     </span>
                   </span>
-                  <span className="flex-shrink-0 flex items-center gap-1 text-on-surface-variant/70">
-                    <span className="material-symbols-outlined text-[13px] text-outline">
-                      schedule
-                    </span>
+                  <span className="flex-shrink-0 flex items-center gap-1.5">
+                    <Clock className="w-3 h-3 flex-shrink-0" />
                     <span>{formatReportDate(report)}</span>
                   </span>
                 </div>
-              </article>
+              </motion.article>
             );
           })}
         </div>
