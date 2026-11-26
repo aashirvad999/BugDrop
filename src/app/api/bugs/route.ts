@@ -12,7 +12,13 @@ export async function GET() {
       .sort({ createdAt: -1 })
       .toArray();
 
-    return NextResponse.json({ reports: docs }, { status: 200 });
+    return NextResponse.json(
+      { reports: docs },
+      {
+        status: 200,
+        headers: { "Cache-Control": "no-store, max-age=0" },
+      }
+    );
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch bug reports";
