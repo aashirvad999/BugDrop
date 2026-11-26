@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Menu, X, Search, LayoutDashboard, Bug, PlusCircle } from "lucide-react";
+import { Menu, X, Search, LayoutDashboard, PlusCircle } from "lucide-react";
 
 interface HeaderProps {
   onOpenCommand?: () => void;
@@ -58,12 +58,6 @@ export function Header({ onOpenCommand }: HeaderProps) {
             className="transition-colors bg-surface-subtle text-ink text-xs font-semibold rounded-md px-3 py-1.5 border border-border/80"
           >
             Cockpit
-          </a>
-          <a
-            href="#reports-section"
-            className="text-xs font-medium text-ink-secondary hover:text-ink hover:bg-surface-subtle/70 rounded-md px-3 py-1.5 transition-colors"
-          >
-            Queue
           </a>
           <a
             href="#bug-submission-section"
@@ -141,14 +135,6 @@ export function Header({ onOpenCommand }: HeaderProps) {
             >
               <LayoutDashboard className="w-4 h-4 text-accent" />
               <span>Cockpit</span>
-            </a>
-            <a
-              href="#reports-section"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-md text-ink-secondary hover:text-ink hover:bg-surface-subtle text-sm font-medium transition-colors min-h-[44px]"
-            >
-              <Bug className="w-4 h-4" />
-              <span>Triage Queue</span>
             </a>
             <a
               href="#bug-submission-section"
