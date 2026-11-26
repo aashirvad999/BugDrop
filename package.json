@@ -28,5 +28,8 @@
   "overrides": {
     "@types/react": "19.3.3",
     "@types/react-dom": "19.3.0"
+  },
+  "allowScripts": {
+    "unrs-resolver@1.12.2": true
   }
 }
