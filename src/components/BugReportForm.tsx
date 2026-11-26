@@ -6,7 +6,7 @@ import { Send, Loader2, Lock, AlertCircle } from "lucide-react";
 import { Severity, BugReport } from "../types/bug";
 
 interface BugReportFormProps {
-  onSubmitSuccess: (newReport: BugReport) => void;
+  onSubmitSuccess: (newReport: BugReport) => Promise<void> | void;
 }
 
 const ENVIRONMENTS = [
@@ -26,9 +26,11 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
   // Validation errors
   const [titleError, setTitleError] = useState<string | null>(null);
   const [descError, setDescError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
 
     let hasError = false;
 
@@ -56,8 +58,8 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const generatedId = `BD-${Math.floor(1043 + Math.random() * 900)}`;
+    try {
+      const generatedId = `BD-${Math.floor(1043 + Math.random() * 9000)}`;
 
       const newReport: BugReport = {
         id: generatedId,
@@ -71,7 +73,7 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
         environment: environment.trim() || "Local Client",
       };
 
-      onSubmitSuccess(newReport);
+      await onSubmitSuccess(newReport);
 
       setTitle("");
       setDescription("");
@@ -79,8 +81,13 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
       setEnvironment("Local Client");
       setTitleError(null);
       setDescError(null);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to submit bug report."
+      );
+    } finally {
       setIsSubmitting(false);
-    }, 450);
+    }
   };
 
   return (
@@ -266,6 +273,15 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
 
         {/* Action Button & Security Notice */}
         <div className="pt-2 flex flex-col gap-3">
+          {submitError && (
+            <p
+              role="alert"
+              className="text-xs text-error bg-error-soft/70 border border-error-border rounded-md px-3 py-2 flex items-center gap-1.5 font-medium"
+            >
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+              {submitError}
+            </p>
+          )}
           <button
             type="submit"
             disabled={isSubmitting}

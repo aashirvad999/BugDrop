@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { CheckCircle2, X, PlusCircle, RotateCcw } from "lucide-react";
+import { CheckCircle2, X, PlusCircle, RotateCcw, Database } from "lucide-react";
 import { Header } from "../components/Header";
 import { SummaryCards } from "../components/SummaryCards";
 import { BugReportForm } from "../components/BugReportForm";
@@ -16,9 +16,42 @@ import { BugReport, BugStatus } from "../types/bug";
 export default function DashboardPage() {
   const [reports, setReports] = useState<BugReport[]>(INITIAL_SAMPLE_BUGS);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [dbNotice, setDbNotice] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"All" | BugStatus>("All");
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [commandOpen, setCommandOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/bugs", { cache: "no-store" })
+      .then(async (res) => {
+        const data = await res.json();
+        if (cancelled) return;
+        if (!res.ok) {
+          setDbNotice(
+            data?.error ||
+            "MongoDB is not configured yet. Using local sample data."
+          );
+          return;
+        }
+        setDbNotice(null);
+        if (Array.isArray(data.reports)) {
+          setReports(data.reports);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDbNotice(
+            "Unable to reach MongoDB API. Showing local sample data."
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Global Cmd+K / Ctrl+K shortcut for Command Palette
   useEffect(() => {
@@ -39,23 +72,76 @@ export default function DashboardPage() {
   const selectedReport =
     reports.find((r) => r.id === selectedReportId) ?? null;
 
-  const handleNewReport = (newReport: BugReport) => {
-    setReports((prev) => [newReport, ...prev]);
-    setToastMessage(`Report #${newReport.id} submitted to triage queue`);
+  const handleNewReport = async (newReport: BugReport) => {
+    const res = await fetch("/api/bugs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newReport),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (res.status === 503) {
+        // MongoDB URI not configured yet; keep local fallback working
+        setReports((prev) => [newReport, ...prev]);
+        setToastMessage(`Report #${newReport.id} added locally (DB not configured)`);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      throw new Error(data?.error || "Failed to save bug report.");
+    }
+
+    const savedReport: BugReport = data.report ?? newReport;
+    setReports((prev) => [savedReport, ...prev]);
+    setDbNotice(null);
+    setToastMessage(`Report #${savedReport.id} saved to MongoDB`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleStatusChange = (id: string, newStatus: BugStatus) => {
+  const handleStatusChange = async (id: string, newStatus: BugStatus) => {
+    const previous = reports;
     setReports((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
     );
-    setToastMessage(`Updated #${id} status to ${newStatus}`);
+
+    try {
+      const res = await fetch(`/api/bugs/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok && res.status !== 503) {
+        setReports(previous);
+        setToastMessage(`Failed to update #${id}`);
+        return;
+      }
+
+      setToastMessage(`Updated #${id} status to ${newStatus}`);
+    } catch {
+      setReports(previous);
+      setToastMessage(`Failed to update #${id}`);
+    }
   };
 
-  const handleResetSeedData = () => {
+  const handleResetSeedData = async () => {
+    try {
+      const res = await fetch("/api/bugs/seed", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.reports)) {
+        setReports(data.reports);
+        setDbNotice(null);
+        setStatusFilter("All");
+        setToastMessage("Sample seed data synced to MongoDB");
+        return;
+      }
+    } catch {
+      // Fallback to local seed
+    }
     setReports(INITIAL_SAMPLE_BUGS);
     setStatusFilter("All");
-    setToastMessage("Sample seed data restored");
+    setToastMessage("Sample seed data restored locally");
   };
 
   return (
@@ -71,6 +157,27 @@ export default function DashboardPage() {
 
         <main className="relative z-10 w-full pt-20 sm:pt-24 pb-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col w-full gap-6 sm:gap-8">
+            {/* Database status notice if MONGODB_URI is not configured */}
+            {dbNotice && (
+              <div
+                className="flex items-center justify-between gap-3 bg-amber-50/90 p-3 rounded-lg border border-amber-200 text-amber-900 text-xs sm:text-sm"
+                role="status"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Database className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                  <span className="truncate">{dbNotice}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDbNotice(null)}
+                  aria-label="Dismiss database notice"
+                  className="p-1 rounded text-amber-700 hover:bg-amber-100 cursor-pointer flex-shrink-0"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* Toast Notification */}
             <AnimatePresence>
               {toastMessage && (
