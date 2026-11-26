@@ -89,14 +89,9 @@ export function BugReportForm({ onSubmitSuccess }: BugReportFormProps) {
       id="bug-submission-section"
     >
       <div className="space-y-1 border-b border-border pb-4">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="font-display text-lg text-ink font-bold tracking-tight">
-            Report a Bug
-          </h2>
-          <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-surface-subtle border border-border text-ink-secondary select-none">
-            Markdown OK
-          </span>
-        </div>
+        <h2 className="font-display text-lg text-ink font-bold tracking-tight">
+          Report a Bug
+        </h2>
         <p className="text-xs sm:text-sm text-ink-secondary leading-relaxed">
           Log an issue directly into the triage cockpit queue.
         </p>
